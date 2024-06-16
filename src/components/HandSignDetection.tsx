@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useState } from "react";
+import * as handpose from "@tensorflow-models/hand-pose-detection";
+import { useEffect, useRef, useState } from "react";
+import Webcam from "react-webcam";
+import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 import Classifier from "./Classifier";
 import HandDetector from "./HandTracking";
-import * as handpose from "@tensorflow-models/hand-pose-detection";
-import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 
 const HandSignDetection = () => {
   const videoRef = useRef(null);
@@ -25,26 +26,11 @@ const HandSignDetection = () => {
   }
 
   useEffect(() => {
-    const setupCamera = async () => {
-      const video = videoRef.current;
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      video.srcObject = stream;
-      video.onloadedmetadata = () => {
-        video.play();
-      };
-    };
-
-    setupCamera();
-  }, []);
-
-  useEffect(() => {
     init().then(({ classifier }) => {
       const handDetector = new HandDetector();
 
       const detectHands = async () => {
-        const video = videoRef.current;
+        const video = videoRef.current.video;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
 
@@ -79,8 +65,6 @@ const HandSignDetection = () => {
             // requestAnimationFrame(detect);
             setLabel(classifier.labels[prediction.highestIndex]);
           }
-
-          // requestAnimationFrame(detect);
         };
 
         setInterval(async () => {
@@ -95,11 +79,18 @@ const HandSignDetection = () => {
   return (
     <div className='App'>
       <h1>Hand Sign Detection</h1>
-      <video
+      <Webcam
         ref={videoRef}
         width='640'
         height='480'
-        // style={{ display: "none" }}
+        style={{ display: "block" }} // Adjust as needed
+        audio={false}
+        screenshotFormat='image/jpeg'
+        videoConstraints={{
+          width: 640,
+          height: 480,
+          facingMode: "user",
+        }}
       />
       <canvas ref={canvasRef} width='640' height='480' />
       <p>Prediction: {label}</p>
