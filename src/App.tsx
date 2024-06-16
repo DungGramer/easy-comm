@@ -1,13 +1,8 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { Button, Flex, Text } from "@radix-ui/themes";
 import "./App.css";
-import { Flex, Text, Button } from "@radix-ui/themes";
 import HandDetector from "./components/HandSignDetection";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
       <Flex direction='column' gap='2'>
