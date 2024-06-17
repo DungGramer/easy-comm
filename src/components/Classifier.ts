@@ -40,11 +40,14 @@ class Classifier {
       .fromPixels(canvas)
       .resizeBilinear([224, 224])
       .toFloat()
-      .div(tf.scalar(127)) 
-      .sub(tf.scalar(1))
-      .expandDims(0);
-    const predictions = await this.model.predict(tensor).data();
-    const highestIndex = predictions.indexOf(Math.max(...predictions));
+      .sub(tf.scalar(127.0))
+      .div(tf.scalar(127.0))
+      .expandDims();
+
+    // const predictions = await this.model.predict(tensor).data();
+    // const highestIndex = predictions.indexOf(Math.max(...predictions));
+    const prediction = this.model.predict(tensor);
+    const highestIndex = prediction.argMax(1).dataSync()[0];
 
     if (draw && this.labels.length > 0) {
       ctx.fillStyle = color;
@@ -52,7 +55,7 @@ class Classifier {
       ctx.fillText(this.labels[highestIndex], pos.x, pos.y);
     }
 
-    return { predictions, highestIndex };
+    return { predictions: prediction.arraySync()[0], highestIndex };
   }
 }
 
