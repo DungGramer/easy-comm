@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 
-class L2 {
+/* class L2 {
   static className = "L2";
   constructor(config) {
     return tf.regularizers.l1l2(config);
@@ -8,13 +8,12 @@ class L2 {
 }
 
 // Register the custom regularizer
-tf.serialization.registerClass(L2);
+tf.serialization.registerClass(L2); */
 
 class Classifier {
   constructor(modelPath, labelsPath) {
     this.modelPath = modelPath;
     this.labelsPath = labelsPath;
-    this.loadModel();
   }
 
   async loadModel() {
@@ -35,7 +34,7 @@ class Classifier {
     scale = 2,
     color = "rgb(0, 255, 0)"
   ) {
-    const ctx = canvas.getContext("2d");
+    /* const ctx = canvas.getContext("2d");
     const tensor = tf.browser
       .fromPixels(canvas)
       .resizeBilinear([224, 224])
@@ -55,7 +54,34 @@ class Classifier {
       ctx.fillText(this.labels[highestIndex], pos.x, pos.y);
     }
 
-    return { predictions: prediction.arraySync()[0], highestIndex };
+    return { predictions: prediction.arraySync()[0], highestIndex }; */
+
+    const ctx = canvas.getContext("2d");
+    let img = tf.browser.fromPixels(
+      ctx.getImageData(0, 0, canvas.width, canvas.height)
+    );
+    let normalizationOffset = tf.scalar(255 / 2); // 127.5
+    let tensor = img
+      .resizeNearestNeighbor([224, 224])
+      .toFloat()
+      .sub(normalizationOffset)
+      .div(normalizationOffset)
+      .reverse(2)
+      .expandDims();
+
+    // 2. Predict
+    let predictions = await this.model.predict(tensor);
+    predictions = predictions.dataSync();
+
+    const top5 = Array.from(predictions)
+      .map((p, i) => ({
+        predictions: p,
+        highestIndex: i,
+      }))
+      .sort((a, b) => a.predictions - b.predictions);
+
+    console.log(`📕 top5 - 89:Classifier.ts \n`, top5);
+    return top5[0];
   }
 }
 

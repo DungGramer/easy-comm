@@ -1,5 +1,6 @@
 import * as handpose from "@tensorflow-models/hand-pose-detection";
-import { useEffect, useRef, useState } from "react";
+import * as tf from "@tensorflow/tfjs-core";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 import Classifier from "./Classifier";
@@ -16,14 +17,47 @@ const HandSignDetection = () => {
       "/models/labels_13chars.txt"
     );
 
-    const handDetector = await handpose.createDetector(
-      handpose.SupportedModels.MediaPipeHands,
-      {
-        runtime: "tfjs",
-      }
-    );
-    return { handDetector, classifier };
+    await classifier.loadModel();
+
+    // const handDetector = await handpose.createDetector(
+    //   handpose.SupportedModels.MediaPipeHands,
+    //   {
+    //     runtime: "tfjs",
+    //   }
+    // );
+    return { classifier };
   }
+
+  const processHands = useCallback(async (hands, classifier) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const hand = hands[0];
+    const keypoints = hand.keypoints;
+    drawKeypoints(keypoints, ctx);
+    drawSkeleton(keypoints, ctx);
+
+    const prediction = await classifier.getPrediction(
+      canvas,
+      true,
+      { x: 50, y: 50 },
+      2,
+      "rgb(0, 255, 0)"
+    );
+    if (keypoints instanceof tf.Tensor) {
+      keypoints.dispose(); // Ensure tensors are disposed
+    }
+    if (prediction instanceof tf.Tensor) {
+      prediction.dispose();
+    }
+
+    setLabel(
+      prediction.highestIndex > 0.9
+        ? classifier.labels[prediction.highestIndex]
+        : "Không nhận ra"
+    );
+  }, []);
 
   useEffect(() => {
     init().then(({ classifier }) => {
@@ -31,45 +65,28 @@ const HandSignDetection = () => {
 
       const detectHands = async () => {
         const video = videoRef.current.video;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
 
         const detect = async () => {
           if (video.readyState !== 4) {
+            requestAnimationFrame(detect);
             return;
           }
-          const hands = await handDetector.findHands(video);
-          const canvas = canvasRef.current;
 
-          if (hands?.length > 0) {
-            const hand = hands[0];
-            const keypoints = hand.keypoints;
-            // ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const ctx = canvasRef.current.getContext("2d");
-            ctx.clearRect(
-              0,
-              0,
-              canvasRef.current.width,
-              canvasRef.current.height
-            );
-            drawKeypoints(keypoints, ctx);
-            drawSkeleton(keypoints, ctx);
+          processHands(null, classifier);
 
-            const prediction = await classifier.getPrediction(
-              canvas,
-              true,
-              { x: 50, y: 50 },
-              2,
-              "rgb(0, 255, 0)"
-            );
-            // requestAnimationFrame(detect);
-            setLabel(classifier.labels[prediction.highestIndex]);
-          }
+          handDetector.findHands(video).then((hands) => {
+            if (hands?.length > 0) {
+              processHands(hands, classifier);
+            }
+            requestAnimationFrame(detect);
+          });
         };
 
-        setInterval(async () => {
-          await detect();
-        }, 60);
+        detect();
+
+        // setInterval(async () => {
+        //   await detect();
+        // }, 60);
       };
 
       detectHands();
@@ -92,8 +109,8 @@ const HandSignDetection = () => {
           facingMode: "user",
         }}
       />
-      <canvas ref={canvasRef} width='640' height='480' />
       <p>Prediction: {label}</p>
+      <canvas ref={canvasRef} width='640' height='480' />
     </div>
   );
 };

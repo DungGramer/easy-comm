@@ -1,5 +1,6 @@
 import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
-import * as tf from "@tensorflow/tfjs-core";
+import { initializeTfjsBackend } from "../utils/HandDetector";
+// import * as tf from "@tensorflow/tfjs-core";
 
 class HandDetector {
   constructor() {
@@ -11,6 +12,7 @@ class HandDetector {
   }
 
   async loadDetector() {
+    await initializeTfjsBackend();
     this.detector = await handPoseDetection.createDetector(
       handPoseDetection.SupportedModels.MediaPipeHands,
       this.detectorConfig
