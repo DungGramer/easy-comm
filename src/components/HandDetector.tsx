@@ -30,13 +30,13 @@ const labels = [
   "xung quanh",
 ];
 
-async function predict(model, video, canvas, setLabel) {
+async function predict(model: tf.LayersModel, video, canvas, setLabel) {
   if (!video || video.readyState !== 4) {
     return;
   }
   
   const context = canvas.getContext("2d");
-  let normalizationOffset = tf.scalar(255/2); // 127.5
+  const normalizationOffset = tf.scalar(255/2); // 127.5
   const tensor = tf.browser
     .fromPixels(canvas)
     .resizeNearestNeighbor([224, 224])
