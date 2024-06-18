@@ -1,4 +1,4 @@
-import * as handpose from "@tensorflow-models/hand-pose-detection";
+// import * as handpose from "@tensorflow-models/hand-pose-detection";
 import * as tf from "@tensorflow/tfjs-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
@@ -33,6 +33,8 @@ const HandSignDetection = () => {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    if (!hands?.length) return;
+    
     const hand = hands[0];
     const keypoints = hand.keypoints;
     drawKeypoints(keypoints, ctx);

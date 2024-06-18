@@ -2,10 +2,13 @@ import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
+import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
+import HandDetector from "./HandTracking";
+// import { throttle, debounce } from "lodash";
 
 const loadModel = async () => {
   try {
-    const modelPath = "/models/model.json";
+    const modelPath = "/old-model/model.json";
     const model = await tf.loadLayersModel(modelPath);
     console.log(model.summary());
     return model;
@@ -13,6 +16,13 @@ const loadModel = async () => {
     console.error("Failed to load model:", error);
   }
 };
+
+let [model, handDetector] = [null, null];
+
+(async () => {
+  model = await loadModel();
+  handDetector = new HandDetector();
+})();
 
 const labels = [
   "chúng tôi",
@@ -34,9 +44,9 @@ async function predict(model: tf.LayersModel, video, canvas, setLabel) {
   if (!video || video.readyState !== 4) {
     return;
   }
-  
-  const context = canvas.getContext("2d");
-  const normalizationOffset = tf.scalar(255/2); // 127.5
+
+  // const context = canvas.getContext("2d");
+  const normalizationOffset = tf.scalar(255 / 2); // 127.5
   const tensor = tf.browser
     .fromPixels(canvas)
     .resizeNearestNeighbor([224, 224])
@@ -51,29 +61,65 @@ async function predict(model: tf.LayersModel, video, canvas, setLabel) {
     .sort((a, b) => b.probability - a.probability)
     .slice(0, 5);
 
-  console.log(top5);
-  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  predictions.dispose();
 
-  setLabel(labels[top5[0].className]);
+  // console.log(top5);
+
+  return setLabel(labels[top5[0].className]);
 }
+
+const processHands = async (canvas, hands) => {
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (hands?.length <= 0) return;
+
+  const hand = hands[0];
+  const keypoints = hand.keypoints;
+  drawKeypoints(keypoints, ctx);
+  drawSkeleton(keypoints, ctx);
+};
 
 const HandSignDetector = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState("loading...");
 
   const run = async () => {
-    loadModel().then((model) => {
-      setInterval(
-        () =>
-          predict(model, videoRef.current.video, canvasRef.current, setLabel),
-        60
-      ); // Adjust prediction rate as needed.
-    });
+    const video = videoRef.current.video;
+    const canvas = canvasRef.current;
+
+    const detect = async () => {
+      if (video.readyState === 4) {
+        // requestAnimationFrame(detect);
+
+        handDetector.findHands(video).then(async (hands) => {
+          if (hands?.length > 0) {
+            await processHands(canvas, hands);
+            const label = await predict(
+              model,
+              videoRef.current.video,
+              canvasRef.current,
+              setLabel
+            );
+          }
+        });
+      }
+    };
+
+    // requestAnimationFrame(detect);
+    setInterval(detect, 60);
   };
 
   useEffect(() => {
     run();
+
+    return () => {
+      if (model) {
+        model.dispose();
+        handDetector.stop();
+      }
+    };
   }, []);
 
   return (

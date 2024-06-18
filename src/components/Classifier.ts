@@ -57,11 +57,11 @@ class Classifier {
     return { predictions: prediction.arraySync()[0], highestIndex }; */
 
     const ctx = canvas.getContext("2d");
-    let img = tf.browser.fromPixels(
+    const img = tf.browser.fromPixels(
       ctx.getImageData(0, 0, canvas.width, canvas.height)
     );
-    let normalizationOffset = tf.scalar(255 / 2); // 127.5
-    let tensor = img
+    const normalizationOffset = tf.scalar(255 / 2); // 127.5
+    const tensor = img
       .resizeNearestNeighbor([224, 224])
       .toFloat()
       .sub(normalizationOffset)

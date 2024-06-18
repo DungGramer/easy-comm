@@ -1,17 +1,27 @@
-import { Button, Flex, Text } from "@radix-ui/themes";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import HandDetector from "./components/HandSignDetection";
 import HandSignDetector from "./components/HandDetector";
+import Body from "./components/ui/Body";
+import Header from "./components/ui/Header";
+import HandSignDetection from "./components/HandSignDetection";
 
 function App() {
   return (
-    <>
-      <Flex direction='column' gap='2'>
-        <Text>Hello from Radix Themes :)</Text>
-        <Button>Let's go</Button>
-        <HandSignDetector />
-      </Flex>
-    </>
+    <Routes>
+      <Route
+        path='/'
+        element={
+          <section>
+            <Header />
+            <section className='mt-[80px]'>
+              <Body />
+            </section>
+          </section>
+        }
+      />
+
+      <Route path='hand-tracking' element={<HandSignDetector />} />
+    </Routes>
   );
 }
 
