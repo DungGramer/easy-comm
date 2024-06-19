@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 import HandDetector from "./HandTracking";
+import { Heading } from "@radix-ui/themes";
 // import { throttle, debounce } from "lodash";
 
 const loadModel = async () => {
@@ -123,23 +124,26 @@ const HandSignDetector = () => {
   }, []);
 
   return (
-    <div>
-      <Webcam
-        ref={videoRef}
-        width='640'
-        height='480'
-        style={{ display: "block" }} // Adjust as needed
-        audio={false}
-        screenshotFormat='image/jpeg'
-        videoConstraints={{
-          width: 640,
-          height: 480,
-          facingMode: "user",
-        }}
-      />
-      <p>Prediction: {label}</p>
-      <canvas ref={canvasRef} width='640' height='480' />
-    </div>
+    <section className='container'>
+      <Heading className='mb-5 mt-2'>Hand Tracking</Heading>
+      <div className='flex gap-2 flex-wrap items-center justify-center'>
+        <Webcam
+          ref={videoRef}
+          width='640'
+          height='480'
+          style={{ display: "block" }} // Adjust as needed
+          audio={false}
+          screenshotFormat='image/jpeg'
+          videoConstraints={{
+            width: 640,
+            height: 480,
+            facingMode: "user",
+          }}
+        />
+        <canvas ref={canvasRef} width='640' height='480' />
+      </div>
+      <p className="mt-4">Prediction: {label}</p>
+    </section>
   );
 };
 
