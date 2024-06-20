@@ -9,7 +9,7 @@ import { Heading } from "@radix-ui/themes";
 
 const loadModel = async () => {
   try {
-    const modelPath = "/old-model/model.json";
+    const modelPath = "/h5-model/model.json";
     const model = await tf.loadLayersModel(modelPath);
     console.log(model.summary());
     return model;
