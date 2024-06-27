@@ -5,7 +5,7 @@ import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 import HandDetector from "./HandTracking";
 import { Heading } from "@radix-ui/themes";
-// import { throttle, debounce } from "lodash";
+import { throttle, debounce } from "lodash";
 
 const loadModel = async () => {
   try {
@@ -64,7 +64,7 @@ async function predict(model: tf.LayersModel, video, canvas, setLabel) {
 
   predictions.dispose();
 
-  // console.log(top5);
+  console.log(top5);
 
   return setLabel(labels[top5[0].className]);
 }
@@ -86,18 +86,21 @@ const HandSignDetector = () => {
   const canvasRef = useRef(null);
   const [label, setLabel] = useState("loading...");
 
+  const throttledPredict = throttle(
+    (model, video, canvas, setLabel) => predict(model, video, canvas, setLabel),
+    1000 // Call at most once per second
+  );
+
   const run = async () => {
     const video = videoRef.current.video;
     const canvas = canvasRef.current;
 
     const detect = async () => {
       if (video.readyState === 4) {
-        // requestAnimationFrame(detect);
-
         handDetector.findHands(video).then(async (hands) => {
           if (hands?.length > 0) {
             await processHands(canvas, hands);
-            const label = await predict(
+            throttledPredict(
               model,
               videoRef.current.video,
               canvasRef.current,
