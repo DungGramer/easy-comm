@@ -85,6 +85,7 @@ const HandSignDetector = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [label, setLabel] = useState("loading...");
+  const [labels, setLabels] = useState([]);
 
   const throttledPredict = throttle(
     (model, video, canvas, setLabel) => predict(model, video, canvas, setLabel),
@@ -126,6 +127,12 @@ const HandSignDetector = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!model || labels.at(-1) === label) return;
+
+    setLabels((prev) => [...prev, label]);
+  }, [label, labels]);
+
   return (
     <section className='container'>
       <Heading className='mb-5 mt-2'>Hand Tracking</Heading>
@@ -145,7 +152,7 @@ const HandSignDetector = () => {
         />
         <canvas ref={canvasRef} width='640' height='480' />
       </div>
-      <p className="mt-4">Prediction: {label}</p>
+      <p className='mt-4'>Prediction: {labels.join(' ')}</p>
     </section>
   );
 };
