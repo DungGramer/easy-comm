@@ -4,6 +4,7 @@ import HandSignDetector from "./components/HandDetector";
 import Body from "./components/ui/Body";
 import Header from "./components/ui/Header";
 import HandSignDetection from "./components/HandSignDetection";
+import SpeechToASL from "./components/SpeechToASL";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       />
 
       <Route path='hand-tracking' element={<HandSignDetector />} />
+      <Route path="speech-to-asl" element={<SpeechToASL />} />
     </Routes>
   );
 }
