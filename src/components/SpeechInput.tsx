@@ -1,15 +1,13 @@
 import { Button } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
+import { useEffect, useState, useRef } from "react";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 const SpeechInput = ({ onTranscript }) => {
   const [imageSrc, setImageSrc] = useState("");
   const [labelsData, setLabelsData] = useState([]);
   const [words, setWords] = useState(["hai"]);
-
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
+  const previousTranscript = useRef("");
 
   useEffect(() => {
     fetch("/images/label.json")
@@ -18,20 +16,26 @@ const SpeechInput = ({ onTranscript }) => {
   }, []);
 
   useEffect(() => {
+    if (previousTranscript.current === transcript) return;
+
+    previousTranscript.current = transcript;
+
     const currentTranscript = transcript;
     const newWords = currentTranscript.trim().split(" ");
     const uniqueNewWords = newWords.filter((word) => !words.includes(word));
-    setWords([...words, ...uniqueNewWords]);
+    setWords((prevWords) => [...prevWords, ...uniqueNewWords]);
 
     const foundLabel = labelsData.find((label) =>
       label.labels.includes((uniqueNewWords.at(-1) || "").toLowerCase())
     );
 
     if (foundLabel) {
-      setImageSrc(`/images/${foundLabel?.src}`);
+      setImageSrc(`/images/${foundLabel.src}`);
     }
 
-    onTranscript(currentTranscript);
+    if (currentTranscript.trim()) {
+      onTranscript(currentTranscript);
+    }
   }, [transcript, labelsData, onTranscript, words]);
 
   const toggleListening = () => {
