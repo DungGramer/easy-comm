@@ -6,7 +6,7 @@ import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 import HandDetector from "./HandTracking";
 import { Heading } from "@radix-ui/themes";
 import { throttle, debounce } from "lodash";
-import './HandDetector.css';
+import "./HandDetector.css";
 
 const loadModel = async () => {
   try {
@@ -19,7 +19,7 @@ const loadModel = async () => {
   }
 };
 
-let [model, handDetector] = [null, null];
+let [model, handDetector, interval] = [null, null, null];
 
 (async () => {
   model = await loadModel();
@@ -98,23 +98,30 @@ const HandSignDetector = () => {
     const canvas = canvasRef.current;
 
     const detect = async () => {
-      if (video.readyState === 4) {
-        handDetector.findHands(video).then(async (hands) => {
-          if (hands?.length > 0) {
-            await processHands(canvas, hands);
-            throttledPredict(
-              model,
-              videoRef.current.video,
-              canvasRef.current,
-              setLabel
-            );
-          }
-        });
+      if (handDetector && video.readyState === 4) {
+        handDetector
+          .findHands(video)
+          .then(async (hands) => {
+            if (hands && hands?.length > 0) {
+              await processHands(canvas, hands);
+              throttledPredict(
+                model,
+                videoRef.current.video,
+                canvasRef.current,
+                setLabel
+              );
+            }
+          })
+          .catch((e) => {
+            console.log(`📕 e - 113:HandDetector.tsx \n`, e);
+            clearInterval(interval);
+            return;
+          });
       }
     };
 
     // requestAnimationFrame(detect);
-    setInterval(detect, 60);
+    interval = setInterval(detect, 60);
   };
 
   useEffect(() => {
@@ -150,11 +157,11 @@ const HandSignDetector = () => {
             height: 480,
             facingMode: "user",
           }}
-          className="mirrored"
+          className='mirrored'
         />
-        <canvas ref={canvasRef} width='640' height='480' className="hidden" />
+        <canvas ref={canvasRef} width='640' height='480' className='hidden' />
       </div>
-      <p className='mt-4'>Prediction: {labels.join(' ')}</p>
+      <p className='mt-4'>Prediction: {labels.join(" ")}</p>
     </section>
   );
 };

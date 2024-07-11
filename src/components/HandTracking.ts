@@ -12,11 +12,14 @@ class L2 {
 tf.serialization.registerClass(L2);
 
 class HandDetector {
+  detector: handPoseDetection.HandDetector;
+  detectorConfig:
+    | handPoseDetection.MediaPipeHandsMediaPipeModelConfig
+    | handPoseDetection.MediaPipeHandsTfjsModelConfig;
   constructor() {
     this.detectorConfig = {
       // modelType: handPoseDetection.SupportedModels.MediaPipeHands,
       runtime: "tfjs",
-
     };
     this.loadDetector();
   }
@@ -31,8 +34,12 @@ class HandDetector {
 
   async findHands(image) {
     if (!image || !this.detector) return;
-    // console.log(`📕 image - 19:HandTracking.ts \n`, image, this.detector);
-    return await this.detector.estimateHands(image);
+    try {
+      const result = await this.detector.estimateHands(image);
+      return result;
+    } catch (e) {
+      console.error(`📕 e - 39:HandTracking.ts \n`, e);
+    }
   }
 
   stop() {
