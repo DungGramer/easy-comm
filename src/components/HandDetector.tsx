@@ -152,7 +152,7 @@ const HandSignDetector = () => {
           }}
           className="mirrored"
         />
-        {/* <canvas ref={canvasRef} width='640' height='480' /> */}
+        <canvas ref={canvasRef} width='640' height='480' className="hidden" />
       </div>
       <p className='mt-4'>Prediction: {labels.join(' ')}</p>
     </section>
