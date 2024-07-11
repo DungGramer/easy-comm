@@ -6,6 +6,7 @@ import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
 import HandDetector from "./HandTracking";
 import { Heading } from "@radix-ui/themes";
 import { throttle, debounce } from "lodash";
+import './HandDetector.css';
 
 const loadModel = async () => {
   try {
@@ -149,8 +150,9 @@ const HandSignDetector = () => {
             height: 480,
             facingMode: "user",
           }}
+          className="mirrored"
         />
-        <canvas ref={canvasRef} width='640' height='480' />
+        {/* <canvas ref={canvasRef} width='640' height='480' /> */}
       </div>
       <p className='mt-4'>Prediction: {labels.join(' ')}</p>
     </section>
