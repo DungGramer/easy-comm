@@ -1,6 +1,8 @@
 import { Button } from "@radix-ui/themes";
 import { useEffect, useState, useRef } from "react";
-import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 const SpeechInput = ({ onTranscript }) => {
   const [imageSrc, setImageSrc] = useState("");
@@ -12,7 +14,14 @@ const SpeechInput = ({ onTranscript }) => {
   useEffect(() => {
     fetch("/images/label.json")
       .then((response) => response.json())
-      .then((x) => setLabelsData(x.data));
+      .then((x) =>
+        setLabelsData(
+          x.data.map((x) => ({
+            ...x,
+            labels: x.labels.map((x) => x.toLowerCase()),
+          }))
+        )
+      );
   }, []);
 
   useEffect(() => {
