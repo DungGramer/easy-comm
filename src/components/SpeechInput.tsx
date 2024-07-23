@@ -1,4 +1,4 @@
-import { Button } from "@radix-ui/themes";
+import { Button } from "@radix-ui/react-button";
 import { useEffect, useState, useRef } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -7,7 +7,7 @@ import SpeechRecognition, {
 const SpeechInput = ({ onTranscript }) => {
   const [imageSrc, setImageSrc] = useState("");
   const [labelsData, setLabelsData] = useState([]);
-  const [words, setWords] = useState(["hai"]);
+  const [words, setWords] = useState([]);
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
   const previousTranscript = useRef("");
 
@@ -16,9 +16,9 @@ const SpeechInput = ({ onTranscript }) => {
       .then((response) => response.json())
       .then((x) =>
         setLabelsData(
-          x.data.map((x) => ({
-            ...x,
-            labels: x.labels.map((x) => x.toLowerCase()),
+          x.data.map((item) => ({
+            ...item,
+            labels: item.labels.map((label) => label.toLowerCase()),
           }))
         )
       );
@@ -28,24 +28,30 @@ const SpeechInput = ({ onTranscript }) => {
     if (previousTranscript.current === transcript) return;
 
     previousTranscript.current = transcript;
+    const currentTranscript = transcript.trim();
+    const newWords = currentTranscript.split(" ");
+    setWords((prevWords) => [...prevWords, ...newWords]);
 
-    const currentTranscript = transcript;
-    const newWords = currentTranscript.trim().split(" ");
-    const uniqueNewWords = newWords.filter((word) => !words.includes(word));
-    setWords((prevWords) => [...prevWords, ...uniqueNewWords]);
+    const checkPhrases = (wordsArray, num) => {
+      return wordsArray.slice(-num).join(" ").toLowerCase();
+    };
 
-    const foundLabel = labelsData.find((label) =>
-      label.labels.includes((uniqueNewWords.at(-1) || "").toLowerCase())
-    );
+    const foundLabel = labelsData.find((label) => {
+      return (
+        label.labels.includes(checkPhrases(newWords, 1)) ||
+        label.labels.includes(checkPhrases(newWords, 2)) ||
+        label.labels.includes(checkPhrases(newWords, 3))
+      );
+    });
 
     if (foundLabel) {
       setImageSrc(`/images/${foundLabel.src}`);
     }
 
-    if (currentTranscript.trim()) {
+    if (currentTranscript) {
       onTranscript(currentTranscript);
     }
-  }, [transcript, labelsData, onTranscript, words]);
+  }, [transcript, labelsData, onTranscript]);
 
   const toggleListening = () => {
     if (listening) {
