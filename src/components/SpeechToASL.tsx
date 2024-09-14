@@ -12,8 +12,8 @@ function SpeechToASL() {
   };
 
   return (
-    <div className='SpeechToASL'>
-      <h1>Vietnamese to ASL Converter</h1>
+    <div className='SpeechToASL container mt-2 flex flex-col'>
+      <h1 className="mb-4">Vietnamese to ASL Converter</h1>
       <SpeechInput onTranscript={handleTranscript} />
       {/* <ASLDisplay gestureData={gesture} /> */}
     </div>

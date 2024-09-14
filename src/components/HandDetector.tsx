@@ -66,8 +66,9 @@ async function predict(model: tf.LayersModel, video, canvas, setLabel) {
   predictions.dispose();
 
   console.log(top5);
-
-  return setLabel(labels[top5[0].className]);
+  if (Number(top5[0].probability) >= 0.6) {
+    return setLabel(labels[top5[0].className]);
+  }
 }
 
 const processHands = async (canvas, hands) => {
