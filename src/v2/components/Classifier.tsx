@@ -13,8 +13,8 @@ const ClassifierComponent = ({ landmarks }) => {
   useEffect(() => {
     // Initialize the classifier once
     classifierRef.current = getClassifier(
-      "/models/model.json",
-      "/models/labels_13chars.txt"
+      "/7char/model.json",
+      "/7char/labels_7chars.txt"
     );
     classifierRef.current.loadModel().catch((error) => {
       console.error("Failed to load classifier:", error);
