@@ -3,7 +3,7 @@
 import { Camera } from "@mediapipe/camera_utils";
 import * as mp_drawing from "@mediapipe/drawing_utils";
 import * as mp_hands from "@mediapipe/hands";
-import { Hands } from "@mediapipe/hands";
+import { Hands, Results } from "@mediapipe/hands";
 import throttle from "lodash/throttle";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -15,12 +15,12 @@ const HandTracking = ({ onHandsDetected }) => {
   const debouncedOnHandsDetected = useCallback(
     throttle((landmarks: any[][]) => {
       onHandsDetected(landmarks);
-    }, 1500), // Debounce interval in milliseconds
+    }, 1000), // Debounce interval in milliseconds
     [onHandsDetected]
   );
 
   useEffect(() => {
-    const hands = new Hands({
+    const hands = new mp_hands.Hands({
       locateFile: (file) => {
         return `/landmarker/${file}`;
       },
