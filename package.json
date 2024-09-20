@@ -11,12 +11,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/control_utils": "^0.6.1675466023",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/hands": "^0.4.1675469240",
+    "@mediapipe/tasks-vision": "^0.10.16",
     "@radix-ui/themes": "^3.0.5",
     "@tensorflow-models/hand-pose-detection": "^2.0.1",
     "@tensorflow-models/handpose": "^0.1.0",
+    "@tensorflow-models/knn-classifier": "^1.2.6",
     "@tensorflow-models/mobilenet": "^2.1.1",
-    "@tensorflow/tfjs": "^4.20.0",
+    "@tensorflow/tfjs": "^4.21.0",
     "lodash": "^4.17.21",
     "opencv.js": "^1.2.1",
     "radix-ui": "^1.0.1",

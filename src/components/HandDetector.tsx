@@ -1,12 +1,12 @@
+import { Heading } from "@radix-ui/themes";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
+import { throttle } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "../utils/drawHand";
-import HandDetector from "./HandTracking";
-import { Heading } from "@radix-ui/themes";
-import { throttle, debounce } from "lodash";
 import "./HandDetector.css";
+import HandDetector from "./HandTracking";
 
 const loadModel = async () => {
   try {
